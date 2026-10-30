@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>kainban</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>kainban</h1>
+    <input v-model="filter" placeholder="filter by id or text…" aria-label="Filter tasks">
+    <button class="primary" @click="openNew('todo')">+ New task</button>
+  </header>
+  <p v-if="err" class="err" role="alert">{{ err }}</p>
+  <main>
+    <section v-for="c in cols" :key="c.key" class="col" @dragover.prevent @drop="drop(c.key)">
+      <h2>{{ c.title }} <span class="count">{{ by(c.key).length }}</span>
+        <button class="add" @click="openNew(c.key)" :aria-label="'Add to ' + c.title">+</button></h2>
+      <article v-for="t in by(c.key)" :key="t.id" class="card" :class="[t.priority, t.status]"
+               draggable="true" tabindex="0" @dragstart="drag = t.id" @click="edit(t)" @keydown.enter="edit(t)">
+        <div class="meta">
+          <span class="id">#{{ t.id }}</span>
+          <span class="badge" :class="t.priority">{{ t.priority }}</span>
+          <span v-if="t.plan" class="tag">plan</span>
+        </div>
+        <div class="title">{{ t.title }}</div>
+      </article>
+    </section>
+  </main>
+  <div class="overlay" v-if="form" @click.self="form = null" @keydown.esc="form = null">
+    <form @submit.prevent="save">
+      <h3>{{ form.id ? 'Task #' + form.id : 'New task' }}</h3>
+      <label>Title <input v-model="form.title" required autofocus></label>
+      <div class="row">
+        <label>Priority
+          <select v-model="form.priority"><option v-for="p in priorities">{{ p }}</option></select></label>
+        <label>Status
+          <select v-model="form.status"><option v-for="c in cols" :value="c.key">{{ c.title }}</option></select></label>
+      </div>
+      <label>Description <textarea v-model="form.description" rows="5"></textarea></label>
+      <label>LLM plan <textarea v-model="form.plan" rows="8" placeholder="Plan first, execute later…"></textarea></label>
+      <div class="actions">
+        <button type="button" class="danger" v-if="form.id" @click="remove">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" @click="form = null">Cancel</button>
+        <button class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="vue.global.prod.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

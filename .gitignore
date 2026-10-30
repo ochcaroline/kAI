@@ -1,0 +1,11 @@
+# binaries
+/kai
+/kainban
+
+# goreleaser
+dist/
+
+# board write temp files
+*.tmp
+
+.DS_Store
